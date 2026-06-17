@@ -141,7 +141,7 @@ communication-playground/
 
 ### Fase 1 — REST
 
-Objetivo da rest-service
+Objetivo da rest-service é seguir práticas REST API
 
 Clean Architecture
 SOLID
@@ -154,7 +154,6 @@ Motor (async)
 Configurações por ambiente
 Versionamento da API
 Docker
-Testes
 OpenAPI/Swagger
 
 user-service (FastAPI)
@@ -166,6 +165,8 @@ GET /api/v1/users
 GET /api/v1/users/{id}
 
 DELETE /api/v1/users/{id}
+
+PATCH /api/v1/users/{id}
 
 GET /api/v1/health
 ```
@@ -181,16 +182,17 @@ app/
 │   └── v1/
 │       ├── users.py
 │       └── health.py
-|
+│
 ├── dependencies/
-|   └── user_dependencies.py
+│   └── user_dependencies.py
 │
 ├── application/
 │   │
-|   ├──dto/
-|   |   ├── create_user_request.py
-|   |   └── user_response.py
-|   |
+│   ├──dto/
+│   │   ├── create_user_request.py
+│   │   ├── update_user_request.py
+│   │   └── user_response.py
+│   │
 │   ├── interfaces/
 │   │   └── user_repository_interface.py
 │   │
@@ -198,11 +200,12 @@ app/
 │       ├── create_user_use_case.py
 │       ├── get_user_use_case.py
 │       ├── get_all_users_use_case.py
+│       ├── update_users_use_case.py
 │       └── delete_user_use_case.py
 │
 ├── domain/
 │   └── entities/
-|       ├── entity_base.py
+│       ├── entity_base.py
 │       └── user.py
 │
 ├── infrastructure/
@@ -210,10 +213,13 @@ app/
 │   │   └── session.py
 │   │
 │   ├── repositories/
-|   |   └── mongo_user_repository.py
+│   |   └── mongo_user_repository.py
 │   │
 │   └── config/
 │       └── settings.py
+│
+├── dependencies/
+│   └──user_dependencies.py
 │
 └── main.py
 
