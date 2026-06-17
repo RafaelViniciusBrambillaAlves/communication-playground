@@ -62,7 +62,7 @@ class MongoUserRepository(IUserRepository):
             {
                 "$set": {
                     "name": name,
-                    "update_at": datetime.now(timezone.utc)
+                    "updated_at": datetime.now(timezone.utc)
                 }
             }
         )
