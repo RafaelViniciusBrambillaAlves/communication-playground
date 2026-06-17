@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+motor
+pydantic[email]
+pydantic-settings>=2.0
+pydantic-settings>=2.0
