@@ -6,7 +6,7 @@ from uuid import UUID
 class IUserRepository(ABC):
 
     @abstractmethod
-    async def create(self, user: UUID) -> User:
+    async def create(self, user: User) -> User:
         pass
 
     @abstractmethod
