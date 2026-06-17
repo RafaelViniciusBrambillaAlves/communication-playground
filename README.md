@@ -197,11 +197,12 @@ app/
 │   │   └── user_repository_interface.py
 │   │
 │   └── use_cases/
-│       ├── create_user_use_case.py
-│       ├── get_user_use_case.py
-│       ├── get_all_users_use_case.py
-│       ├── update_users_use_case.py
-│       └── delete_user_use_case.py
+│       └── user/
+│           ├── create_user_use_case.py
+│           ├── get_user_use_case.py
+│           ├── get_all_users_use_case.py
+│           ├── update_users_use_case.py
+│           └── delete_user_use_case.py
 │
 ├── domain/
 │   └── entities/
@@ -218,8 +219,6 @@ app/
 │   └── config/
 │       └── settings.py
 │
-├── dependencies/
-│   └──user_dependencies.py
 │
 └── main.py
 
@@ -227,3 +226,164 @@ Dockerfile
 requirements.txt
 .env 
 ```
+
+Testar 
+
+```txt
+http://localhost:8001/docs
+```
+
+
+
+
+### Fase 2 — GraphQL
+
+Objetivo da graph-service é seguir práticas GraphQL
+
+Clean Architecture
+SOLID principles
+Dependency Injection
+DTOs
+Repository Pattern
+Use Cases
+Pydantic v2
+Motor (async MongoDB)
+Docker
+
+Estrutura do projeto
+
+```txt
+graphql-service/
+app/
+│
+├── presentation/
+│   └── graphql/
+│       ├── queries/
+│       │   └── user_query.py
+│       │
+│       ├── mutations/
+│       │   └── user_mutation.py
+│       │
+│       ├── types/
+│       │   └── user_type.py
+│       │
+│       ├── inputs/
+│       │   ├── create_user_input.py
+│       │   └── update_user_input.py
+│       │
+│       └── schema.py
+│   
+├── dependencies/
+│   └── user_dependencies.py
+│
+├── application/
+│   ├── dto/ 
+│   │   └── user_response.py
+│   │
+│   ├── interfaces/
+│   │   └── user_repository_interface.py
+│   │
+│   └── use_cases/
+│       └── user/
+│           ├── create_user_use_case.py
+│           ├── get_user_use_case.py
+│           ├── get_all_users_use_case.py
+│           ├── update_user_use_case.py
+│           └── delete_user_use_case.py
+│
+├── domain/
+│   └── entities/
+│       ├── entity_base.py
+│       └── user.py
+│
+│
+├── infrastructure/
+│   ├── database/
+│   │   └── session.py
+│   ├── repositories/
+│   │   └── mongo_user_repository.py
+│   └── config/
+│       └── settings.py
+│
+└── main.py
+```
+
+Testar 
+
+```txt
+http://localhost:8002/graphql
+```
+
+Mutation Create User
+```GraphQL
+mutation {
+  createUser(
+    input: {
+      name: "Teste"
+      email: "teste@email.com"
+      age: 25
+    }
+  ) {
+    id
+    name
+    email
+    age
+    createdAt
+  }
+}
+```
+
+Query Get All Users
+```GraphQL
+query {
+  getAllUsers {
+    id
+    name
+    email
+    age
+  }
+}
+```
+
+Query Get User
+```GraphQL
+mutation{
+    getUser(
+        id: "8d3f3c91-5db9-4b2c-b1d3-1df3e7e56d5d"
+    ) {
+        id
+        name
+        email
+        age
+    }
+}
+```
+
+Mutation Update User
+```GraphQl
+mutation{
+    updateUser(
+        input: {
+            id: "8d3f3c91-5db9-4b2c-b1d3-1df3e7e56d5d"
+            name: Teste 2
+            age: 22
+        }
+    ) {
+        id
+        name
+        email
+        age
+        updatedAt
+    }
+}
+```
+
+Mutation Delete User
+```GraphQL
+mutation{
+    deleteUser(
+        userId: "8d3f3c91-5db9-4b2c-b1d3-1df3e7e56d5d"
+    )
+}
+```
+

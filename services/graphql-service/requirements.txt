@@ -1,0 +1,6 @@
+fastapi
+strawberry-graphql[fastapi]
+motor
+pydantic[email]
+pydantic-settings>=2.0
+uvicorn[standard]

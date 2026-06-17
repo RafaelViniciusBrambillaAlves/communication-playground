@@ -1,13 +1,26 @@
 services:
-  api:
-    container_name: rest-service
-    build: /services/rest-service/.
+  # rest-service:
+  #   container_name: rest-service
+  #   build: /services/rest-service/.
+  #   env_file:
+  #     - /services/rest-service/.env
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - .:/services/rest-service
+  #   command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+  #   depends_on:
+  #     - mongo
+
+  graphql-service:
+    container_name: graphql-service
+    build: /services/graphql-service/.
     env_file:
-      - /services/rest-service/.env
+      - /services/graphql-service/.env
     ports:
-      - "8001:8000"
+      - "8002:8000"
     volumes:
-      - .:/services/rest-service
+      - .:/services/graphql-service
     command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - mongo
