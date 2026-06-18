@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, status, Depends
 
 from app.application.dto.create_user_request import CreateUserRequest
+from app.application.dto.update_user_dto import UpdateUserDto
 from app.application.dto.user_response import UserResponse
 from app.application.dto.update_user_request import UpdateUserRequest
 from app.application.use_cases.user.create_user_use_case import CreateUserUseCase
@@ -94,7 +95,14 @@ async def delete_user(
     user_id: UUID,
     use_case: DeleteUserUseCase = Depends(get_delete_user_use_case)
 ):
-    await use_case.execute(user_id)
+    deleted = await use_case.execute(user_id)
+    
+    if not deleted:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "User not found"
+        )
+
 
 
 @router.patch(
@@ -106,14 +114,20 @@ async def update_user(
     request: UpdateUserRequest,
     use_case: UpdateUserUseCase = Depends(get_update_user_use_case)
 ):
-    user = await use_case.execute(user_id = user_id, name = request.name)
+    
+    dto = UpdateUserDto(
+        id = user_id,
+        name = request.name,
+        email = request.email,
+        age = request.age
+    )
+
+    user = await use_case.execute(dto)
 
     if user is None:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
             detail = "User not found"
         )
-    
-    return UserResponse(
-        **user.model_dump()
-    )
+    return UserResponse(**user.model_dump())
+

@@ -32,11 +32,11 @@ def get_get_user_use_case(
 
 
 def get_delete_user_use_case(
-    repository: DeleteUserUseCase = Depends(get_user_repository)
+    repository: MongoUserRepository = Depends(get_user_repository)
 ) -> DeleteUserUseCase:
     return DeleteUserUseCase(repository)
 
 def get_update_user_use_case(
-    repository: UpdateUserUseCase = Depends(get_user_repository) 
+    repository: MongoUserRepository = Depends(get_user_repository) 
 ) -> UpdateUserUseCase:
     return UpdateUserUseCase(repository)

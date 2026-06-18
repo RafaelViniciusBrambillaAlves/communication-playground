@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+from uuid import UUID
 
 from app.domain.entities.user import User
-from uuid import UUID
+from app.application.dto.update_user_dto import UpdateUserDto
 
 class IUserRepository(ABC):
 
@@ -18,9 +19,9 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def delete(self, user_id: UUID) -> None:
+    async def delete(self, user_id: UUID) -> bool:
         pass
 
     @abstractmethod
-    async def update_name(self, user_id: UUID, name: str) -> User | None:
+    async def update_name(self, dto: UpdateUserDto) -> User | None:
         pass

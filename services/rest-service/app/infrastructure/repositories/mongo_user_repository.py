@@ -1,15 +1,16 @@
+from datetime import datetime, timezone
+from uuid import UUID
+
 from app.application.interfaces.user_repository_interface import IUserRepository
 from app.domain.entities.user import User
 from app.infrastructure.database.session import MongoDatabase
-from datetime import datetime, timezone
-from uuid import UUID
+from app.application.dto.update_user_dto import UpdateUserDto
 
 
 class MongoUserRepository(IUserRepository):
 
     def __init__(self):
-        database = MongoDatabase()
-        self.collection = database.get_database()["users"]
+        self.collection = MongoDatabase.get_database()["users"]
 
 
     async def create(self, user: User) -> User:
@@ -49,33 +50,39 @@ class MongoUserRepository(IUserRepository):
         return users
 
 
-    async def delete(self, user_id: UUID) -> None:
+    async def delete(self, user_id: UUID) -> bool:
         
-        await self.collection.delete_one(
+        result = await self.collection.delete_one(
             {"id": str(user_id)}
         )
+        return result.deleted_count > 0
 
-    async def update_name(self, user_id: UUID, name: str):
+    async def update_name(self, dto: UpdateUserDto) -> User | None:
         
-        await self.collection.update_one(
-            {"id": str(user_id)},
-            {
-                "$set": {
-                    "name": name,
-                    "updated_at": datetime.now(timezone.utc)
-                }
-            }
+        update_data: dict = {}
+
+        if dto.name is not None:
+            update_data["name"] = dto.name
+
+        if dto.email is not None:
+            update_data["email"] = dto.email
+
+        if dto.age is not None:
+            update_data["age"] = dto.age
+        
+        if not update_data:
+            return await self.get_by_id(dto.id)
+        
+        update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        
+        result = await self.collection.update_one(
+            {"id": str(dto.id)},
+            {"$set": update_data}
         )
 
-        user = await self.collection.find_one(
-            {"id": str(user_id)}
-        )
-
-        if user is None:
+        if result.matched_count == 0:
             return None
-
-        user.pop("_id", None)
-
-        return User(**user)
+        
+        return await self.get_by_id(dto.id)
         
         

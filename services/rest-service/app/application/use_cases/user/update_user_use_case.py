@@ -2,6 +2,7 @@ from uuid import UUID
 
 from app.application.interfaces.user_repository_interface import IUserRepository
 from app.domain.entities.user import User
+from app.application.dto.update_user_dto import UpdateUserDto
 
 class UpdateUserUseCase:
 
@@ -13,11 +14,9 @@ class UpdateUserUseCase:
 
     async def execute(
         self, 
-        user_id: UUID,
-        name: str
+        dto: UpdateUserDto
     ) -> User | None:
         
         return await self.user_repository.update_name(
-            user_id,
-            name
+            dto
         )

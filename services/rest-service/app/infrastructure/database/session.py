@@ -1,18 +1,23 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase            
 
 from app.infrastructure.config.settings import settings
 
 class MongoDatabase:
+    _client: AsyncIOMotorDatabase | None = None
 
-    def __init__(self):
-        self.client = AsyncIOMotorClient(
-            settings.MONGODB_URL
-        )
+    @classmethod
+    def connect(cls) -> None:
+        if cls._client is None:
+            cls._client = AsyncIOMotorClient(settings.MONGODB_URL)
 
-        self.db = self.client[settings.MONGODB_DATABASE]
+    @classmethod
+    def disconnect(cls) -> None:
+        if cls._client is not None:
+            cls._client.close()
+            cls._client = None
 
-    def get_database(self):
-        return self.db
-
-    async def close(self):
-        self.client.close()
+    @classmethod
+    def get_database(cls) -> AsyncIOMotorDatabase:
+        if cls._client is None:
+            raise RuntimeError("MongoDB is not connected. Call connect() first.")
+        return cls._client[settings.MONGODB_DATABASE]
