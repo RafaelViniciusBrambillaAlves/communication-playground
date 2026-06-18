@@ -1,3 +1,5 @@
+from uuid import UUID
+
 import strawberry
 
 from app.dependencies.use_case_dependencies.user_dependencies import (
@@ -12,11 +14,14 @@ from app.presentation.graphql.types.user_type import UserType
 class UserQuery:
 
     @strawberry.field
-    async def get_user(self, id: str) -> UserType:
+    async def get_user(self, id: UUID) -> UserType:
 
         use_case = get_get_user_use_case()
 
         user = await use_case.execute(id)
+
+        if user is None:
+            raise ValueError("User not found")
 
         return UserType(
             id = user.id,
@@ -29,7 +34,7 @@ class UserQuery:
     
 
     @strawberry.field
-    async def get_all_user(self) -> list[UserType]:
+    async def get_all_users(self) -> list[UserType]:
         
         use_case = get_get_all_users_use_case()
 

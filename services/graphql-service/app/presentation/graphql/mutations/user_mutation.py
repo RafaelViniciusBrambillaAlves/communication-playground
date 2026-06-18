@@ -54,13 +54,16 @@ class UserMutation:
         use_case = get_update_user_use_case()
 
         dto = UpdateUserDTO(
-            id=input.id,
-            name=input.name,
-            email=input.email,
-            age=input.age
+            id = input.id,
+            name = input.name,
+            email = input.email,
+            age = input.age
         )
 
         user = await use_case.execute(dto)
+        
+        if user is None:
+            raise ValueError("User not found")
 
         return UserType(
             id = user.id,
@@ -79,7 +82,10 @@ class UserMutation:
         
         use_case = get_delete_user_use_case()
 
-        await use_case.execute(user_id)
+        deleted = await use_case.execute(user_id)
+
+        if not deleted:
+            raise ValueError("User not found")
 
         return True
 

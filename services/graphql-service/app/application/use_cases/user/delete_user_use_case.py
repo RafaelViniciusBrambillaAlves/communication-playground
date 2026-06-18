@@ -13,7 +13,7 @@ class DeleteUserUseCase:
     async def execute(
         self,
         user_id: UUID
-    ) -> None:
+    ) -> bool:
         
         return await self.repository.delete(
             user_id

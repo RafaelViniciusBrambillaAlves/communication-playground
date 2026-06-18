@@ -20,7 +20,7 @@ class IUserRepository(ABC):
         pass
 
     @abstractmethod
-    async def delete(self, user_id: UUID) -> None:
+    async def delete(self, user_id: UUID) -> bool:
         pass
 
     @abstractmethod
