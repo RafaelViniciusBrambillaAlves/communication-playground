@@ -191,6 +191,7 @@ app/
 │   ├──dto/
 │   │   ├── create_user_request.py
 │   │   ├── update_user_request.py
+│   │   ├── update_user_dto
 │   │   └── user_response.py
 │   │
 │   ├── interfaces/
@@ -387,3 +388,194 @@ mutation{
 }
 ```
 
+### Fase 3 — gRPC
+
+Estrutura dos arquivos
+```txt
+grpc-service/
+
+src/
+│
+├── GrpcService.Api
+│   ├── Protos
+│   │     User.proto
+│   ├── Services
+│   │     UserGrpcService.cs
+│   ├── Extensions
+│   ├── Program.cs
+│   └── appsettings.json
+│
+├── GrpcService.Application
+│   ├── DTOs
+│   │     UserDto.cs
+│   ├── UseCases
+│   │     CreateUser
+│   │     GetUserById
+│   │     ListUsers
+│   ├── Interfaces
+│   │     IUserRepository.cs
+│   └── Mappers
+│
+├── GrpcService.Domain
+│   ├── Entities
+│   │     User.cs
+│   ├── ValueObjects
+│   └── Exceptions
+│
+├── GrpcService.Infrastructure
+│   ├── Repositories
+│   │     UserRepository.cs
+│   ├── Data
+│   │     AppDbContext.cs
+│   └── DependencyInjection.cs
+│
+└── GrpcService.Shared
+
+Dockerfile
+.env
+```
+
+1. Criar a pasta raiz
+```bash
+mkdir grpc-service
+cd grpc-service
+
+mkdir src
+```
+2. Criar a Solution
+```bash
+dotnet new sln -n GrpcService
+```
+
+3. Criar os projetos
+
+Entre na pasta src:
+```bash
+cd src
+```
+Crie os projetos:
+```bash
+dotnet new grpc -n GrpcService.Api
+
+dotnet new classlib -n GrpcService.Application
+
+dotnet new classlib -n GrpcService.Domain
+
+dotnet new classlib -n GrpcService.Infrastructure
+
+dotnet new classlib -n GrpcService.Shared
+```
+A estrutura ficará assim:
+```txt
+grpc-service/
+├── src/
+│   ├── GrpcService.Api/
+│   ├── GrpcService.Application/
+│   ├── GrpcService.Domain/
+│   ├── GrpcService.Infrastructure/
+│   └── GrpcService.Shared/
+└── GrpcService.sln
+```
+
+4. Adicionar os projetos na Solution
+
+Volte para a raiz:
+```bash
+cd ..
+```
+Adicione todos os projetos:
+```bash
+dotnet sln add src/GrpcService.Api/GrpcService.Api.csproj
+
+dotnet sln add src/GrpcService.Application/GrpcService.Application.csproj
+
+dotnet sln add src/GrpcService.Domain/GrpcService.Domain.csproj
+
+dotnet sln add src/GrpcService.Infrastructure/GrpcService.Infrastructure.csproj
+
+dotnet sln add src/GrpcService.Shared/GrpcService.Shared.csproj
+```
+
+5. Criar as referências entre projetos
+
+Uma arquitetura comum seria:
+```txt
+Api
+ ├─> Application
+ ├─> Infrastructure
+ └─> Shared
+
+Application
+ ├─> Domain
+ └─> Shared
+
+Infrastructure
+ ├─> Application
+ ├─> Domain
+ └─> Shared
+```
+
+Referências entre projetos
+
+**Domain**
+
+Não referencia ninguém.
+
+**Application**
+
+Referencia Domain:
+```xml
+<ItemGroup>
+    <ProjectReference Include="..\GrpcService.Domain\GrpcService.Domain.csproj"/>
+</ItemGroup>
+```
+
+**Infrastructure**
+
+Referencia:
+```xml
+<ItemGroup>
+    <ProjectReference Include="..\GrpcService.Application\GrpcService.Application.csproj"/>
+    <ProjectReference Include="..\GrpcService.Domain\GrpcService.Domain.csproj"/>
+</ItemGroup>
+```
+
+**Api**
+
+Referencia:
+```xml
+<ItemGroup>
+    <ProjectReference Include="..\GrpcService.Application\GrpcService.Application.csproj"/>
+    <ProjectReference Include="..\GrpcService.Infrastructure\GrpcService.Infrastructure.csproj"/>
+</ItemGroup>
+```
+
+docker-compose.yml
+.dockerignore
+.gitignore
+services/
+└── grpc-service/
+    ├── src/
+    │   ├── GrpcService.Api/
+    │   │   ├── appsettings.json
+    │   │   ├── Program.cs   
+    │   │   └── GrpcService.Api.csproj
+    │   ├── GrpcService.Application/
+    │   │   ├── DependencyInjection.cs  
+    │   │   └── GrpcService.Application.csproj
+    │   ├── GrpcService.Domain/
+    │   │   └── GrpcService.Domain.csproj
+    │   └── GrpcService.Infrastructure/
+    │       ├── DependencyInjection.cs  
+    │       └── GrpcService.Infrastructure.csproj
+    ├── GrpcService.slnx
+    ├── Dockerfile
+    ├── Directory.Build.props
+    ├── Directory.Packages.props
+    └── .env
+
+algumas informcoes
+Vou usar SQL server
+Clean arquitecture, ainda vou fazer as pastas e os arquivos dentro de cada pasta
+Vou usar o .net 10 
+Sem testes

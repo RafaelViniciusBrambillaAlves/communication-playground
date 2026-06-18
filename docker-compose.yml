@@ -1,38 +1,103 @@
 services:
-  rest-service:
-    container_name: rest-service
-    build: ./services/rest-service
-    env_file:
-      - ./services/rest-service/.env
-    ports:
-      - "8001:8000"
-    volumes:
-      - ./services/rest-service:/app  
-    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-    depends_on:
-      - mongo
 
-  # graphql-service:
-  #   container_name: graphql-service
-  #   build: ./services/graphql-service
+  # rest-service:
+  #   container_name: rest-service
+  
+  #   build: ./services/rest-service
+
   #   env_file:
-  #     - ./services/graphql-service/.env
+  #     - ./services/rest-service/.env
+
   #   ports:
-  #     - "8002:8000"
+  #     - "8001:8000"
+
   #   volumes:
-  #     - ./services/graphql-service:/app  
+  #     - ./services/rest-service:/app  
+
   #   command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
   #   depends_on:
   #     - mongo
 
-  mongo:
-    image: mongo:7
-    container_name: mongo_db
+  # graphql-service:
+  #   container_name: graphql-service
+
+  #   build: ./services/graphql-service
+
+  #   env_file:
+  #     - ./services/graphql-service/.env
+
+  #   ports:
+  #     - "8002:8000"
+
+  #   volumes:
+  #     - ./services/graphql-service:/app  
+
+  #   command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  #   depends_on:
+  #     - mongo
+
+
+  grpc-service:
+    container_name: grpc-service
+
+    build:
+      context: ./services/grpc-service
+
+    env_file:
+      - ./services/grpc-service/.env
+
     ports:
-      - "27017:27017"
+      - "8003:8080"
+
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      
+    networks:
+      - services-network
+
+
+  # mongo:
+  #   image: mongo:7
+  #   container_name: mongo_db
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - mongo_data:/data/db
+  #   restart: unless-stopped
+    
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+
+    ports:
+      - "1433:1433"
+
     volumes:
-      - mongo_data:/data/db
-    restart: unless-stopped
+      - sql_data:/var/opt/mssql
+
+    healthcheck:
+      test: 
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+    networks:
+      - services-network
 
 volumes:
-  mongo_data:
+  # mongo_data:
+  sql_data:
+
+networks:
+  services-network:
+    driver: bridge

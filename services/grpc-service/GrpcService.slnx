@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GrpcService.Api/GrpcService.Api.csproj" />
+    <Project Path="src/GrpcService.Application/GrpcService.Application.csproj" />
+    <Project Path="src/GrpcService.Domain/GrpcService.Domain.csproj" />
+    <Project Path="src/GrpcService.Infrastructure/GrpcService.Infrastructure.csproj" />
+  </Folder>
+</Solution>
