@@ -1,2 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <Folder Include="Entities\" />
+        <Folder Include="Exceptions\" />
+    </ItemGroup>
+
 </Project>

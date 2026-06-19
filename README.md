@@ -550,6 +550,9 @@ Referencia:
 </ItemGroup>
 ```
 
+Estrutura do projeto
+
+```txt
 docker-compose.yml
 .dockerignore
 .gitignore
@@ -561,11 +564,37 @@ services/
     │   │   ├── Program.cs   
     │   │   └── GrpcService.Api.csproj
     │   ├── GrpcService.Application/
+    │   │   ├── Dtos/
+    │   │   │   └── UserDto.cs       
+    │   │   ├── Interfaces/
+    │   │   │   └── IUserRepository.cs
+    │   │   ├── Mappers/
+    │   │   │   └── UserMapper.cs
+    │   │   ├── UseCases/
+    │   │   │   ├── Createuser/ 
+    │   │   │   │   └── CreateUserUseCase.cs
+    │   │   │   ├── DeleteUser/
+    │   │   │   │   └── DeleteUserUseCase.cs
+    │   │   │   ├── GetAllUser/
+    │   │   │   │   └── GetAllUsersUseCase.cs
+    │   │   │   ├── GetUserById/
+    │   │   │   │   └── GetUserByIdUseCase.cs
+    │   │   │   └── UpdateUser/
+    │   │   │       └── UpdateUserUseCase.cs
     │   │   ├── DependencyInjection.cs  
     │   │   └── GrpcService.Application.csproj
     │   ├── GrpcService.Domain/
+    │   │   ├── Entities/
+    │   │   │   ├── EntityBase.cs
+    │   │   │   └── User.cs
+    │   │   ├── Exceptions/
+    │   │   │   └── UserNotFound.cs
     │   │   └── GrpcService.Domain.csproj
     │   └── GrpcService.Infrastructure/
+    │       ├── Data/
+    │       │   └── AppDbContext.cs
+    │       ├── Repositories/
+    │       │   └── UserRepository.cs
     │       ├── DependencyInjection.cs  
     │       └── GrpcService.Infrastructure.csproj
     ├── GrpcService.slnx
@@ -573,9 +602,66 @@ services/
     ├── Directory.Build.props
     ├── Directory.Packages.props
     └── .env
+```
 
-algumas informcoes
-Vou usar SQL server
-Clean arquitecture, ainda vou fazer as pastas e os arquivos dentro de cada pasta
-Vou usar o .net 10 
-Sem testes
+
+Migrations 
+
+```bash
+cd services/grpc-service
+dotnet ef migrations add InitialCreate --project src/GrpcService.Infrastructure --startup-project src/GrpcService.Api
+```
+
+Testar no Postman 
+
+```txt
+localhost:8003
+```
+```txt
+user.UserServce/
+    CreateUser
+    GetUser
+    GetAllUser
+    UpdateUser
+    DeleteUser
+```
+
+CreateUser
+```json
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "age": 30
+}
+```
+
+GetAllUsers
+```json
+{}
+```
+
+
+GetUser
+```json
+{
+  "id": ""
+}
+```
+
+UpdateUser
+```json
+{
+  "id": "",
+  "name": "João Silva Atualizado",
+  "email": "joao.novo@email.com",
+  "age": 35
+}
+```
+
+DeleteUser
+```json
+{
+  "id": "f7d4af22-f665-4702-b2bf-2a3498af4d9d"
+}
+```
+

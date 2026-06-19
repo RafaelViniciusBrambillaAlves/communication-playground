@@ -1,5 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using GrpcService.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using GrpcService.Application.Interfaces;
+using GrpcService.Infrastructure.Repositories;
 
 namespace GrpcService.Infrastructure;
 
@@ -9,6 +13,16 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        services.AddDbContext<AppDbContext>(options => 
+            options.UseSqlServer(
+                configuration.GetConnectionString("SqlServer"),
+                sql => sql.EnableRetryOnFailure(
+                    maxRetryCount: 5,
+                    maxRetryDelay: TimeSpan.FromSeconds(10),
+                    errorNumbersToAdd: null)));
+
+        services.AddScoped<IUserRepository, UserRepository>();
+
         return services;
     }
 }
