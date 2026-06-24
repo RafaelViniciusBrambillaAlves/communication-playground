@@ -1,28 +1,20 @@
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status
 
 from app.application.dto.create_user_request import CreateUserRequest
 from app.application.dto.update_user_dto import UpdateUserDto
 from app.application.dto.user_response import UserResponse
 from app.application.dto.update_user_request import UpdateUserRequest
-from app.application.use_cases.user.create_user_use_case import CreateUserUseCase
-from app.application.use_cases.user.delete_user_use_case import DeleteUserUseCase
-from app.application.use_cases.user.get_all_users_use_case import GetAllUsersUseCase
-from app.application.use_cases.user.get_user_use_case import GetUserUseCase
-from app.application.use_cases.user.update_user_use_case import UpdateUserUseCase
 from app.domain.entities.user import User
-from app.infrastructure.repositories.mongo_user_repository import (
-    MongoUserRepository
-)
-from app.dependencies.user_dependencies import (
-    get_create_user_use_case,
-    get_get_all_users_use_case,
-    get_delete_user_use_case,
-    get_get_user_use_case,
-    get_update_user_use_case
-)
 
+from app.dependencies.types import (
+    CreateUserDep,
+    DeleteUserDep, 
+    GetAllUsersDep, 
+    GetUserDep,
+    UpdateUserDep
+)
 
 router = APIRouter(
     prefix = "/users",
@@ -36,7 +28,7 @@ router = APIRouter(
 )
 async def create_user(
     request: CreateUserRequest,
-    use_case: CreateUserUseCase = Depends(get_create_user_use_case)
+    use_case: CreateUserDep
 ):
 
     user = User(
@@ -55,7 +47,7 @@ async def create_user(
     response_model = list[UserResponse]
 )
 async def get_all_users(
-    use_case: GetAllUsersUseCase = Depends(get_get_all_users_use_case)
+    use_case: GetAllUsersDep
 ):
     users = await use_case.execute()
 
@@ -71,7 +63,7 @@ async def get_all_users(
 )
 async def get_user(
     user_id: UUID,
-    use_case: GetUserUseCase = Depends(get_get_user_use_case)
+    use_case: GetUserDep
 ):
 
     user = await use_case.execute(user_id)
@@ -93,7 +85,7 @@ async def get_user(
 )
 async def delete_user(
     user_id: UUID,
-    use_case: DeleteUserUseCase = Depends(get_delete_user_use_case)
+    use_case: DeleteUserDep
 ):
     deleted = await use_case.execute(user_id)
     
@@ -112,7 +104,7 @@ async def delete_user(
 async def update_user(
     user_id: UUID,
     request: UpdateUserRequest,
-    use_case: UpdateUserUseCase = Depends(get_update_user_use_case)
+    use_case: UpdateUserDep
 ):
     
     dto = UpdateUserDto(
