@@ -7,13 +7,10 @@ from app.application.dto.user_event_request import (
     PublishUserDeletedRequest
 )
 
-from app.application.use_cases.publish_user_created_use_case import PublishUserCreatedUseCase
-from app.application.use_cases.publish_user_updated_use_case import PublishUserUpdatedUseCase
-from app.application.use_cases.publish_user_deleted_use_case import PublishUserDeletedUseCase
-from app.dependencies.messaging_dependencies import (
-    get_publish_user_created_use_case,
-    get_publish_user_updated_use_case, 
-    get_publish_user_deleted_use_case
+from app.dependencies.types import (
+    CreateUserDep,
+    UpdateUserDep,
+    DeletedUserDep
 )
 
 router = APIRouter(prefix = "/events", tags = ["Events"])
@@ -25,7 +22,7 @@ router = APIRouter(prefix = "/events", tags = ["Events"])
 )
 async def publish_user_created(
     request: PublishUserCreatedRequest,
-    use_case: PublishUserCreatedUseCase = Depends(get_publish_user_created_use_case)
+    use_case: CreateUserDep
 ):
     user_id = await use_case.execute(request)
 
@@ -42,7 +39,7 @@ async def publish_user_created(
 )
 async def publish_user_updated(
     request: PublishUserUpdatedRequest,
-    use_case: PublishUserUpdatedUseCase = Depends(get_publish_user_updated_use_case)
+    use_case: UpdateUserDep
 ):
     await use_case.execute(request)
 
@@ -58,7 +55,7 @@ async def publish_user_updated(
 )
 async def publish_user_deleted(
     request: PublishUserDeletedRequest,
-    use_case: PublishUserDeletedUseCase = Depends(get_publish_user_deleted_use_case)
+    use_case: DeletedUserDep
 ):
     await use_case.execute(request)
 
