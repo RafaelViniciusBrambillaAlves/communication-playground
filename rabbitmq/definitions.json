@@ -1,0 +1,145 @@
+{
+  "users": [
+    {
+      "name": "rabbitmq_user",
+      "password": "rabbitmq_pass",
+      "tags": "administrator"
+    }
+  ],
+
+  "permissions": [
+    {
+      "user": "rabbitmq_user",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+
+  "vhosts": [{ "name": "/" }],
+  
+  "exchanges": [
+    {
+      "name": "user.events",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "user.events.dlx",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "user.created.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "user.events.dlx",
+        "x-dead-letter-routing-key": "user.created"
+      }
+    },
+    {
+      "name": "user.updated.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "user.events.dlx",
+        "x-dead-letter-routing-key": "user.updated"
+      }
+    },
+    {
+      "name": "user.deleted.queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-dead-letter-exchange": "user.events.dlx",
+        "x-dead-letter-routing-key": "user.deleted"
+      }
+    },
+    {
+      "name": "user.created.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "user.updated.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "user.deleted.dlq",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "user.events",
+      "vhost": "/",
+      "destination": "user.created.queue",
+      "destination_type": "queue",
+      "routing_key": "user.created",
+      "arguments": {}
+    },
+    {
+      "source": "user.events",
+      "vhost": "/",
+      "destination": "user.updated.queue",
+      "destination_type": "queue",
+      "routing_key": "user.updated",
+      "arguments": {}
+    },
+    {
+      "source": "user.events",
+      "vhost": "/",
+      "destination": "user.deleted.queue",
+      "destination_type": "queue",
+      "routing_key": "user.deleted",
+      "arguments": {}
+    },
+    {
+      "source": "user.events.dlx",
+      "vhost": "/",
+      "destination": "user.created.dlq",
+      "destination_type": "queue",
+      "routing_key": "user.created",
+      "arguments": {}
+    },
+    {
+      "source": "user.events.dlx",
+      "vhost": "/",
+      "destination": "user.updated.dlq",
+      "destination_type": "queue",
+      "routing_key": "user.updated",
+      "arguments": {}
+    },
+    {
+      "source": "user.events.dlx",
+      "vhost": "/",
+      "destination": "user.deleted.dlq",
+      "destination_type": "queue",
+      "routing_key": "user.deleted",
+      "arguments": {}
+    }
+  ]
+}

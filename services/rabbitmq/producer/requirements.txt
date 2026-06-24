@@ -1,0 +1,6 @@
+# services/rabbitmq-producer/requirements.txt
+fastapi
+uvicorn[standard]
+aio-pika
+pydantic[email]
+pydantic-settings>=2.0
