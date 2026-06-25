@@ -4,4 +4,4 @@ from pydantic import BaseModel
 
 class PublishEventResponse(BaseModel):
     message: str
-    user_id: UUID
+    user_id: UUID | None = None
