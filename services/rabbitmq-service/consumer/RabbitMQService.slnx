@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RabbitMQService.Worker/RabbitMQService.Worker.csproj" />
+    <Project Path="src/RabbitMQService.Application/RabbitMQService.Application.csproj" />
+    <Project Path="src/RabbitMQService.Domain/RabbitMQService.Domain.csproj" />
+    <Project Path="src/RabbitMQService.Infrastructure/RabbitMQService.Infrastructure.csproj" />
+  </Folder>
+</Solution>

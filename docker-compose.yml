@@ -90,16 +90,16 @@ services:
   rabbitmq-producer:
     container_name: rabbitmq-producer
 
-    build: ./services/rabbitmq/producer
+    build: ./services/rabbitmq-service/producer
 
     env_file:
-      - ./services/rabbitmq/producer/.env
+      - ./services/rabbitmq-service/producer/.env
 
     ports:
       - "8005:8000"
 
     volumes:
-      - ./services/rabbitmq/producer:/app
+      - ./services/rabbitmq-service/producer:/app
 
     command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
@@ -110,15 +110,33 @@ services:
     networks:
       - services-network
 
+  rabbitmq-consumer:
+    container_name: rabbitmq-consumer
+
+    build:
+      context: ./services/rabbitmq-service/consumer
+
+    env_file:
+      - ./services/rabbitmq-service/consumer/.env
+
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      sqlserver:
+        condition: service_healthy
+
+    networks:
+      - services-network
+
 
   # rabbitmq-consumer:
   #   container_name: rabbitmq-consumer
 
   #   build:
-  #     context: ./services/rabbitmq/consumer
+  #     context: ./services/rabbitmq-service/consumer
 
   #   env_file:
-  #     - ./services/rabbitmq/consumer/.env
+  #     - ./services/rabbitmq-service/consumer/.env
 
   #   depends_on:
   #     rabbitmq:
@@ -169,31 +187,31 @@ services:
   #   restart: unless-stopped
     
 
-  # sqlserver:
-  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
 
-  #   environment:
-  #     SA_PASSWORD: "YourStrong!Passw0rd"
-  #     ACCEPT_EULA: "Y"
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
 
-  #   ports:
-  #     - "1433:1433"
+    ports:
+      - "1433:1433"
 
-  #   volumes:
-  #     - sql_data:/var/opt/mssqlfrabbitmq
+    volumes:
+      - sql_data:/var/opt/mssqlfrabbitmq
 
-  #   healthcheck:
-  #     test: 
-  #       [
-  #         "CMD-SHELL",
-  #         "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1"
-  #       ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 10
+    healthcheck:
+      test: 
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  #   networks:
-  #     - services-network
+    networks:
+      - services-network
 
 
 
