@@ -23,5 +23,3 @@ class PublishUserUpdatedRequest(BaseModel):
 
 class PublishUserDeletedRequest(BaseModel):
     user_id: UUID
-
-

@@ -1,16 +1,13 @@
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 
-from app.api.v1 import events, health
-from app.infrastructure.messaging.rabbitmq_connection import RabbitMQConnection
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await RabbitMQConnection.connect()
-    yield
-    await RabbitMQConnection.disconnect()
-
+from app.infrastructure.config.lifespan import lifespan
+from app.infrastructure.config.exception_handlers import (
+    global_exception_handler,
+    runtime_exception_handler, 
+    validation_exception_handler
+)
+from app.api.routers import register_routes
 
 app = FastAPI(
     title = "RabbitMQ Producer Service",
@@ -18,6 +15,19 @@ app = FastAPI(
     lifespan = lifespan
 )
 
-prefix = "/api/v1"
-app.include_router(events.router, prefix = prefix)
-app.include_router(health.router, prefix = prefix)
+app.add_exception_handler(
+    RequestValidationError,
+    validation_exception_handler
+)
+
+app.add_exception_handler(
+    RuntimeError,
+    runtime_exception_handler
+)
+
+app.add_exception_handler(
+    Exception,
+    global_exception_handler
+)
+
+register_routes(app)
