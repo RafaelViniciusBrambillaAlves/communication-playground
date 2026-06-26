@@ -3,6 +3,7 @@
   <ItemGroup>
     <Folder Include="DTOs\" />
     <Folder Include="Interfaces\" />
+    <Folder Include="Mappers\" />
     <Folder Include="UseCases\" />
   </ItemGroup>
 

@@ -12,6 +12,8 @@ using RabbitMQService.Application.UseCases.HandleUserCreated;
 using RabbitMQService.Application.UseCases.HandleUserUpdated;
 using RabbitMQService.Application.UseCases.HandleUserDeleted;
 using RabbitMQService.Infrastructure.Settings;
+using RabbitMQService.Domain.Exceptions;
+using Azure.Core;
 
 
 namespace RabbitMQService.Infrastructure.Messaging;
@@ -124,19 +126,63 @@ public sealed class RabbitMQConsumerService(
     }
 
     private async Task OnMessageReceivedAsync(IChannel channel, BasicDeliverEventArgs ea)
-    {
+    {   
+        var ct = CancellationToken.None;
         var body = Encoding.UTF8.GetString(ea.Body.ToArray());
 
         logger.LogInformation("Message received - routing key: {RoutingKey}", ea.RoutingKey);
 
         try
         {
-            await DispatchAsync(ea.RoutingKey, body, ea.CancellationToken);
-            await channel.BasicAckAsync(ea.DeliveryTag, multiple: false, ea.CancellationToken);
+            await DispatchAsync(ea.RoutingKey, body, ct);
+            await channel.BasicAckAsync(ea.DeliveryTag, multiple: false, ct);
+        }
+        catch (UserAlreadyExistsException ex)
+        {
+            logger.LogWarning(
+                "Duplicate e-mail — routing to DLQ. Routing key: {Key} | {Message}",
+                ea.RoutingKey, ex.Message);
+
+            await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, ct);
+        }
+        catch (UserNotFoundException ex)
+        {
+            logger.LogWarning(
+                "User not found — routing to DLQ. Routing key: {Key} | {Message}",
+                ea.RoutingKey, ex.Message);
+
+            await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, ct);
+        }
+        catch (ArgumentException ex)
+        {
+            logger.LogWarning(
+                "Validation error — routing to DLQ. Routing key: {Key} | {Message}",
+                ea.RoutingKey, ex.Message);
+
+            await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, ct);
+        }
+        catch (FormatException ex)
+        {
+            logger.LogWarning(
+                "Invalid ID format — routing to DLQ. Routing key: {Key} | {Message}",
+                ea.RoutingKey, ex.Message);
+
+            await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, ct);
+        }
+        catch (JsonException ex)
+        {
+            logger.LogWarning(
+                "Malformed JSON — routing to DLQ. Routing key: {Key} | {Message}",
+                ea.RoutingKey, ex.Message);
+
+            await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, ct);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to processe message with routing key {Routing}.", ea.RoutingKey);
+            logger.LogError(
+                ex, 
+                "Unexpected error — routing to DLQ. Routing key: {Key}",
+                ea.RoutingKey);
 
             // requeue: false → mensagem vai para a DLQ configurada
             await channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false, ea.CancellationToken );
@@ -154,17 +200,23 @@ public sealed class RabbitMQConsumerService(
         {
             case "user.created":
             {
-                var payload = envelope.Payload.Deserialize<UserCreatedPayload>(_jsonOptions)!;
+                var payload = envelope.Payload.Deserialize<UserCreatedPayload>(_jsonOptions)
+                    ?? throw new JsonException("Failed to deserialize UserCreatedPayload.");
+
                 var useCase = scope.ServiceProvider.GetRequiredService<HandleUserCreatedUseCase>();
                 
                 await useCase.ExecuteAsync(payload, cancellationToken);
                 
-                logger.LogInformation("User created - id: {UserId} | email: {Email}", payload.UserId, payload.Email);
+                logger.LogInformation(
+                    "User created - id: {UserId} | email: {Email}", 
+                    payload.UserId, payload.Email);
                 break;
             }
             case "user.updated":
             {
-                var payload = envelope.Payload.Deserialize<UserUpdatedPayload>(_jsonOptions)!;
+                var payload = envelope.Payload.Deserialize<UserUpdatedPayload>(_jsonOptions)
+                    ?? throw new JsonException("Failed to deserialize UserUpdatedPayload.");
+
                 var useCase = scope.ServiceProvider.GetRequiredService<HandleUserUpdatedUseCase>();
 
                 await useCase.ExecuteAsync(payload, cancellationToken);
@@ -174,7 +226,9 @@ public sealed class RabbitMQConsumerService(
             }
             case "user.deleted":
             {
-                var payload = envelope.Payload.Deserialize<UserDeletedPayload>(_jsonOptions)!;
+                var payload = envelope.Payload.Deserialize<UserDeletedPayload>(_jsonOptions)
+                    ?? throw new JsonException("Failed to deserialize UserDeletedPayload.");
+
                 var useCase = scope.ServiceProvider.GetRequiredService<HandleUserDeletedUseCase>();
 
                 await useCase.ExecuteAsync(payload, cancellationToken);

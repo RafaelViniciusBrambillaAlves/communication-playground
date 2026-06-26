@@ -1,5 +1,14 @@
 namespace RabbitMQService.Application.DTOs;
 
+public sealed record UserDto(
+    Guid Id,
+    string Name,
+    string Email,
+    int Age, 
+    DateTime CreatedAt,
+    DateTime? UpdatedAt
+);
+
 public sealed record UserEventMessage(
     Guid EventId,
     string EventType,

@@ -17,8 +17,17 @@ public sealed class UserRepository(AppDbContext context) : IUserRepository
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await context.Users.AsNoTracking()
+        return await context.Users
+            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await context.Users
+            .AsNoTracking()
+            .OrderBy(u => u.CreatedAt)
+            .ToListAsync(cancellationToken);
     }
 
 
@@ -46,4 +55,10 @@ public sealed class UserRepository(AppDbContext context) : IUserRepository
         return true;
     }
     
+    public async Task<bool> ExistsWithEmailAsync(string email, CancellationToken cancellationToken = default)
+    {
+        return await context.Users
+            .AsNoTracking()
+            .AnyAsync(u => u.Email == email.Trim().ToLower(), cancellationToken);
+    }
 }

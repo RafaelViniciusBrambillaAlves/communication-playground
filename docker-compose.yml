@@ -119,6 +119,9 @@ services:
     env_file:
       - ./services/rabbitmq-service/consumer/.env
 
+    ports:
+      - "8006:8080"
+
     depends_on:
       rabbitmq:
         condition: service_healthy
